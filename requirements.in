@@ -1,0 +1,16 @@
+# production
+requests[socks]
+logzero
+pyyaml
+easyeda2kicad
+PyQt6
+
+# development
+pip==22.0.4
+pip-tools
+flake8
+black
+mypy
+pylint
+isort
+ipdb
