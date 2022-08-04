@@ -2,7 +2,7 @@
 
 Electronic components search & load engine for KiCad.
 
-Support:
+Support souces:
 
 - SZLCSC
 - LCSC

@@ -1,6 +1,5 @@
 import sys
 
-from logzero import logger
 from PyQt6.QtWidgets import QApplication
 
 from src.config import Config
@@ -11,7 +10,6 @@ def main() -> None:
     title = "KiCad IC Engine"
 
     config = Config()
-    logger.debug(config.config)
 
     app = QApplication(sys.argv)
     app.setApplicationName(title)
