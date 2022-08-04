@@ -1,3 +1,4 @@
+import signal
 import sys
 
 from PyQt6.QtWidgets import QApplication
@@ -7,6 +8,8 @@ from src.gui import Window
 
 
 def main() -> None:
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     title = "KiCad IC Engine"
 
     config = Config()

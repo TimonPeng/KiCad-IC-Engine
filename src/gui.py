@@ -3,18 +3,23 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from .config import Config
 
 
-class MainLayout(QtWidgets.QVBoxLayout):
-    # top to bottom layout
+class MainLayout(QtWidgets.QWidget):
     def __init__(self, window: QtWidgets.QWidget) -> None:
         super().__init__()
 
+        # top to bottom layout
+        layout = QtWidgets.QVBoxLayout()
+
         # search layout
         search_layout = SearchLayout(window)
-        self.addLayout(search_layout)
-
+        layout.addLayout(search_layout)
+        # results layout
         result_layout = ResultLayout(window)
-        self.addLayout(result_layout)
+        layout.addLayout(result_layout)
+
         # layout.addStretch(1)
+
+        self.setLayout(layout)
 
 
 class SearchLayout(QtWidgets.QHBoxLayout):
@@ -28,44 +33,15 @@ class SearchLayout(QtWidgets.QHBoxLayout):
         # search keyword
         self.keyword = QtWidgets.QLineEdit()
         self.addWidget(self.keyword)
-
         # search button
         button = QtWidgets.QPushButton("Search")
         button.clicked.connect(self.on_button_clicked)
         self.addWidget(button)
 
     def on_button_clicked(self):
-        if len(self.keyword.text()) < 3:
-            QtWidgets.QMessageBox.warning(self.window, "Error", "Keyword must be at least 3 characters")
+        if len(self.keyword.text()) < 2:
+            QtWidgets.QMessageBox.warning(self.window, "Error", "Keyword must be at least 2 characters")
             return
-
-
-class ResultModel(QtCore.QAbstractTableModel):
-    def __init__(self):
-        super().__init__()
-
-        self.headers = ["Scientist name", "Birthdate", "Contribution"]
-        self.rows = [
-            ("Newton", "1643-01-04", "Classical mechanics"),
-            ("Einstein", "1879-03-14", "Relativity"),
-            ("Darwin", "1809-02-12", "Evolution"),
-        ]
-
-    def rowCount(self, parent):
-        return len(self.rows)
-
-    def columnCount(self, parent):
-        return len(self.headers)
-
-    def data(self, index, role):
-        if role != QtCore.Qt.ItemDataRole.DisplayRole:
-            return QtCore.QVariant()
-        return self.rows[index.row()][index.column()]
-
-    def headerData(self, section, orientation, role):
-        if role != QtCore.Qt.ItemDataRole.DisplayRole or orientation != QtCore.Qt.Orientation.Horizontal:
-            return QtCore.QVariant()
-        return self.headers[section]
 
 
 class ResultLayout(QtWidgets.QHBoxLayout):
@@ -73,17 +49,27 @@ class ResultLayout(QtWidgets.QHBoxLayout):
     def __init__(self, window: QtWidgets.QWidget) -> None:
         super().__init__()
 
-        # parent window
-        self.window = window
-
-        view = QtWidgets.QTableView()
-        result = ResultModel()
-        view.setModel(result)
-
-        self.addWidget(view)
+        table = ResultTable(window)
+        self.addWidget(table)
 
 
-class Window(QtWidgets.QWidget):
+# QTableView or QTableWidget?
+class ResultTable(QtWidgets.QTableWidget):
+    def __init__(self, window: QtWidgets.QWidget) -> None:
+        super().__init__()
+
+        titles = ["Device", "Footprint", "Symbol", "Value", "Supplier Part", "Manufacturer"]
+        # must set column count first
+        self.setColumnCount(len(titles))
+        self.setHorizontalHeaderLabels(titles)
+
+        # select full row
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
+        # can't edit
+        self.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+
+
+class Window(QtWidgets.QMainWindow):
     def __init__(self, config: Config) -> None:
         super().__init__()
 
@@ -97,7 +83,22 @@ class Window(QtWidgets.QWidget):
         height = config.height or int(screen_size.height() / 2)
         self.resize(width, height)
 
-        self.setLayout(MainLayout(self))
+        # set menu bar
+        menu_bar = self.menuBar()
+        # file menu
+        file_menu = menu_bar.addMenu("File")
+        # settings will be merged when running on macOS
+        settings_action = file_menu.addAction("Settings")
+        close_action = file_menu.addAction("Close")
+        close_action.triggered.connect(self.close)
+        # help menu
+        help_menu = menu_bar.addMenu("Help")
+        # about will be merged when running on macOS
+        about_action = help_menu.addAction("About")
+        about_action.triggered.connect(self.show_about_dialog)
+
+        # main layout
+        self.setCentralWidget(MainLayout(self))
 
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         new_size = event.size()
@@ -108,3 +109,14 @@ class Window(QtWidgets.QWidget):
         self.config.width = width
         self.config.height = height
         self.config.save()
+
+    def show_about_dialog(self):
+        text = (
+            "<center>"
+            f"<h1>{self.windowTitle()}</h1>"
+            f"<p>PyQt {QtCore.PYQT_VERSION_STR}</p>"
+            f"<p>Qt {QtCore.QT_VERSION_STR}</p>"
+            "<p>Version 31.4.159.265358</p>"
+            "</center>"
+        )
+        QtWidgets.QMessageBox.about(self, "About", text)

@@ -4,5 +4,7 @@ Electronic components search & load engine for KiCad.
 
 Support souces:
 
-- SZLCSC
-- LCSC
+- SZLCSC Electronics
+- LCSC Electronics
+- LCEDA
+- EasyEDA
