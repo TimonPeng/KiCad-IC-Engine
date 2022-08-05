@@ -1,8 +1,6 @@
 import easyeda2kicad
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from .config import Config
-
 
 class MainLayout(QtWidgets.QWidget):
     def __init__(self, window: QtWidgets.QWidget) -> None:
@@ -72,17 +70,17 @@ class ResultTable(QtWidgets.QTableWidget):
 
 
 class Window(QtWidgets.QMainWindow):
-    def __init__(self, config: Config) -> None:
+    def __init__(self, settings: QtCore.QSettings) -> None:
         super().__init__()
 
-        self.config = config
+        self.settings = settings
 
         # set the window size
         screen_size = self.screen().size()
         # default width is 2/3 of the screen width
-        width = config.width or int(screen_size.width() / 3 * 2)
+        width = settings.value("UI/width", type=int, defaultValue=int(screen_size.width() / 3 * 2))
         # default width is 1/2 of the screen width
-        height = config.height or int(screen_size.height() / 2)
+        height = settings.value("UI/height", type=int, defaultValue=int(screen_size.height() / 2))
         self.resize(width, height)
 
         # set menu bar
@@ -108,9 +106,8 @@ class Window(QtWidgets.QMainWindow):
         width = new_size.width()
         height = new_size.height()
 
-        self.config.width = width
-        self.config.height = height
-        self.config.save()
+        self.settings.setValue("UI/width", width)
+        self.settings.setValue("UI/height", height)
 
     def show_about_dialog(self):
         text = (

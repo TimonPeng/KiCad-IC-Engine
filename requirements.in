@@ -1,7 +1,6 @@
 # production
 requests[socks]
 logzero
-pyyaml
 easyeda2kicad
 PyQt6
 
