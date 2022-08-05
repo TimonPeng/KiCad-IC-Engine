@@ -1,3 +1,4 @@
+import easyeda2kicad
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from .config import Config
@@ -13,6 +14,7 @@ class MainLayout(QtWidgets.QWidget):
         # search layout
         search_layout = SearchLayout(window)
         layout.addLayout(search_layout)
+
         # results layout
         result_layout = ResultLayout(window)
         layout.addLayout(result_layout)
