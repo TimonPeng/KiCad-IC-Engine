@@ -32,5 +32,21 @@ class RESTfulAPI:
 class SZLCSC(RESTfulAPI):
     ENDPOINT = "https://pro.lceda.cn/api"
 
-    def search(self):
-        pass
+    def process_response(self, request: Request, response: Response):
+        try:
+            data = response.json()
+        except ValueError:
+            response.raise_for_status()
+            raise
+        else:
+            # message: "throw unkown exceptions, Failed to get data!"
+            # resultCode: "0004"
+            if not data.get("success") or data.get("code") != 0:
+                raise Exception(data.get("message", "Fail to get data"))
+
+            return data
+
+    def search(self, keyword: str):
+        data = self.get("/szlcsc/eda/product/list", params={"wd": keyword})
+
+        return data.get("result", [])

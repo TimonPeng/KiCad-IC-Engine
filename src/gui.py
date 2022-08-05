@@ -1,72 +1,7 @@
 import easyeda2kicad
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-
-class MainLayout(QtWidgets.QWidget):
-    def __init__(self, window: QtWidgets.QWidget) -> None:
-        super().__init__()
-
-        # top to bottom layout
-        layout = QtWidgets.QVBoxLayout()
-
-        # search layout
-        search_layout = SearchLayout(window)
-        layout.addLayout(search_layout)
-
-        # results layout
-        result_layout = ResultLayout(window)
-        layout.addLayout(result_layout)
-
-        # layout.addStretch(1)
-
-        self.setLayout(layout)
-
-
-class SearchLayout(QtWidgets.QHBoxLayout):
-    # left to right layout
-    def __init__(self, window: QtWidgets.QWidget) -> None:
-        super().__init__()
-
-        # parent window
-        self.window = window
-
-        # search keyword
-        self.keyword = QtWidgets.QLineEdit()
-        self.addWidget(self.keyword)
-        # search button
-        button = QtWidgets.QPushButton("Search")
-        button.clicked.connect(self.on_button_clicked)
-        self.addWidget(button)
-
-    def on_button_clicked(self):
-        if len(self.keyword.text()) < 2:
-            QtWidgets.QMessageBox.warning(self.window, "Error", "Keyword must be at least 2 characters")
-            return
-
-
-class ResultLayout(QtWidgets.QHBoxLayout):
-    # left to right layout
-    def __init__(self, window: QtWidgets.QWidget) -> None:
-        super().__init__()
-
-        table = ResultTable(window)
-        self.addWidget(table)
-
-
-# QTableView or QTableWidget?
-class ResultTable(QtWidgets.QTableWidget):
-    def __init__(self, window: QtWidgets.QWidget) -> None:
-        super().__init__()
-
-        titles = ["Device", "Footprint", "Symbol", "Value", "Supplier Part", "Manufacturer"]
-        # must set column count first
-        self.setColumnCount(len(titles))
-        self.setHorizontalHeaderLabels(titles)
-
-        # select full row
-        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
-        # can't edit
-        self.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+from .api import SZLCSC
 
 
 class Window(QtWidgets.QMainWindow):
@@ -74,6 +9,8 @@ class Window(QtWidgets.QMainWindow):
         super().__init__()
 
         self.settings = settings
+
+        self.source = SZLCSC()
 
         # set the window size
         screen_size = self.screen().size()
@@ -119,3 +56,74 @@ class Window(QtWidgets.QMainWindow):
             "</center>"
         )
         QtWidgets.QMessageBox.about(self, "About", text)
+
+
+class MainLayout(QtWidgets.QWidget):
+    def __init__(self, window: Window) -> None:
+        super().__init__()
+
+        # top to bottom layout
+        layout = QtWidgets.QVBoxLayout()
+
+        # search layout
+        search_layout = SearchLayout(window)
+        layout.addLayout(search_layout)
+
+        # results layout
+        result_layout = ResultLayout(window)
+        layout.addLayout(result_layout)
+
+        # layout.addStretch(1)
+
+        self.setLayout(layout)
+
+
+class SearchLayout(QtWidgets.QHBoxLayout):
+    # left to right layout
+    def __init__(self, window: Window) -> None:
+        super().__init__()
+
+        # parent window
+        self.window = window
+
+        # search keyword
+        self.keyword = QtWidgets.QLineEdit()
+        self.addWidget(self.keyword)
+        # search button
+        button = QtWidgets.QPushButton("Search")
+        button.clicked.connect(self.on_button_clicked)
+        self.addWidget(button)
+
+    def on_button_clicked(self):
+        keyword = self.keyword.text()
+        if len(keyword) < 2:
+            QtWidgets.QMessageBox.warning(self.window, "Error", "Keyword must be at least 2 characters")
+            return
+
+        result = self.window.source.search(keyword)
+        print(result[0])
+
+
+class ResultLayout(QtWidgets.QHBoxLayout):
+    # left to right layout
+    def __init__(self, window: Window) -> None:
+        super().__init__()
+
+        table = ResultTable(window)
+        self.addWidget(table)
+
+
+# QTableView or QTableWidget?
+class ResultTable(QtWidgets.QTableWidget):
+    def __init__(self, window: Window) -> None:
+        super().__init__()
+
+        titles = ["Device", "Footprint", "Symbol", "Value", "Supplier Part", "Manufacturer"]
+        # must set column count first
+        self.setColumnCount(len(titles))
+        self.setHorizontalHeaderLabels(titles)
+
+        # select full row
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
+        # can't edit
+        self.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
