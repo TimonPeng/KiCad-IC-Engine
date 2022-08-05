@@ -1,6 +1,9 @@
 install:
 	pip install -r requirements.txt
 
+uninstall:
+	pip freeze | xargs pip uninstall -y
+
 compile:
 	pip-compile --output-file=requirements.txt requirements.in && make install
 
