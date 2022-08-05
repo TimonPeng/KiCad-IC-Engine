@@ -4,6 +4,8 @@ from requests import Request, Response, Session
 
 
 class RESTfulAPI:
+    ENDPOINT = ""
+
     def __init__(self) -> None:
         self.session = Session()
 
