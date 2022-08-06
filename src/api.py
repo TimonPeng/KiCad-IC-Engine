@@ -49,4 +49,30 @@ class SZLCSC(RESTfulAPI):
     def search(self, keyword: str):
         data = self.get("/szlcsc/eda/product/list", params={"wd": keyword})
 
-        return data.get("result", [])
+        results = []
+
+        for index, result in enumerate(data.get("result", [])):
+            title = result.get("display_title")
+
+            footprint = result.get("footprint", {})
+            footprint_title = footprint.get("display_title")
+
+            symbol = result.get("symbol", {})
+            symbol_title = symbol.get("display_title")
+
+            attributes = result.get("attributes", {})
+            value = attributes.get("Value")
+            supplier_part = attributes.get("Supplier Part")
+
+            results.append(
+                {
+                    "index": index + 1,
+                    "title": title,
+                    "footprint_title": footprint_title,
+                    "symbol_title": symbol_title,
+                    "value": value,
+                    "supplier_part": supplier_part,
+                }
+            )
+
+        return results

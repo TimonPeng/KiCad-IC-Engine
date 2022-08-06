@@ -64,9 +64,9 @@ class Window(QtWidgets.QMainWindow):
 
         # result model
         result_model = ResultModel()
-        self.result_model = result_model
 
         # result table
+        # result_table = QtWidgets.QTableWidget()
         result_table = QtWidgets.QTableView()
         self.result_table = result_table
         # disable header hightlight
@@ -106,8 +106,10 @@ class Window(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Error", "Keyword must be at least 2 characters")
             return
 
-        # result = self.window.source.search(keyword)
-        # print(result[0])
+        results = self.source.search(keyword)
+
+        self.result_table.setModel(ResultModel(results))
+        self.result_table.update()
 
     def show_about_dialog(self):
         text = (
@@ -122,11 +124,20 @@ class Window(QtWidgets.QMainWindow):
 
 
 class ResultModel(QtCore.QAbstractTableModel):
-    def __init__(self) -> None:
+    def __init__(self, rows=[]) -> None:
         super().__init__()
 
-        self.headers = ["Scientist name", "Birthdate", "Contribution"]
-        self.rows = [{"birthdate": "1643-01-04"}]
+        # display name -> key
+        self.headers = {
+            "No.": "index",
+            "Device": "title",
+            "Footprint": "footprint_title",
+            "Symbol": "symbol_title",
+            "Value": "value",
+            "Supplier Part": "supplier_part",
+        }
+        self.header_keys = list(self.headers.keys())
+        self.rows = rows
 
     def columnCount(self, parent):
         return len(self.headers)
@@ -138,13 +149,14 @@ class ResultModel(QtCore.QAbstractTableModel):
         if role != QtCore.Qt.ItemDataRole.DisplayRole or orientation != QtCore.Qt.Orientation.Horizontal:
             return QtCore.QVariant()
 
-        return self.headers[section]
+        return self.header_keys[section]
 
     def data(self, index, role):
         if role != QtCore.Qt.ItemDataRole.DisplayRole:
             return QtCore.QVariant()
 
         row = self.rows[index.row()]
-        key = self.headers[index.column()].lower()
+        header_display = self.header_keys[index.column()]
+        header_key = self.headers.get(header_display)
 
-        return row.get(key)
+        return row.get(header_key)
