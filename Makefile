@@ -6,11 +6,11 @@ install:
 	poetry install
 
 format:
-	isort src
-	black --line-length=120 src
+	poetry run isort src
+	poetry run black --line-length=120 src
 
 lint:
-	black --check --diff --line-length=120 src
-	flake8 src
-	pylint src
-	mypy src
+	poetry run black --check --diff --line-length=120 src
+	poetry run flake8 src
+	poetry run pylint src
+	poetry run mypy src
