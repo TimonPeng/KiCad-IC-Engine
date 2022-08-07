@@ -11,5 +11,19 @@
     "editor.formatOnSave": true,
     "editor.tabSize": 4,
     "editor.codeActionsOnSave": ["source.organizeImports"]
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "highlight.regexes": {
+    "(window)\\.": {
+      "filterFileRegex": ".*\\.py",
+      "decorations": [
+        {
+          "fontStyle": "italic",
+          "color": "#c0c1b5"
+        }
+      ]
+    }
   }
 }

@@ -1,4 +1,3 @@
-import easyeda2kicad
 from PyQt6 import QtCore, QtGui, QtWidgets
 from qasync import asyncSlot
 
@@ -6,6 +5,9 @@ from .api import SZLCSC
 
 
 class Window(QtWidgets.QMainWindow):
+    # search keyword
+    keyword: QtWidgets.QLineEdit
+
     def __init__(self, settings: QtCore.QSettings) -> None:
         super().__init__()
 
@@ -13,6 +15,9 @@ class Window(QtWidgets.QMainWindow):
         global settings
         """
         self.settings = settings
+        # search source
+        source = SZLCSC
+        self.source = source
 
         """
         window size
@@ -28,10 +33,7 @@ class Window(QtWidgets.QMainWindow):
         dialog
         """
         # about dialog
-        about_dialog = QtWidgets.QDialog()
-        about_dialog.setWindowTitle("About")
-        # can't close main window until close dialog
-        about_dialog.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
+        about_dialog = Dialog("About")
         self.about_dialog = about_dialog
 
         """
@@ -42,7 +44,7 @@ class Window(QtWidgets.QMainWindow):
         # file menu
         file_menu = menu_bar.addMenu("File")
         # settings will be merged when running on macOS
-        settings_action = file_menu.addAction("Settings")
+        # settings_action = file_menu.addAction("Settings")
         close_action = file_menu.addAction("Close")
         close_action.triggered.connect(self.close)
 
@@ -53,54 +55,9 @@ class Window(QtWidgets.QMainWindow):
         about_action.triggered.connect(self.show_about_dialog)
 
         """
-        search source
+        main layout widget
         """
-        source = SZLCSC
-        self.source = source
-
-        """
-        layout
-        """
-        # search keyword
-        keyword = QtWidgets.QLineEdit()
-        self.keyword = keyword
-
-        # search button
-        search_button = QtWidgets.QPushButton("Search")
-        search_button.clicked.connect(self.on_search_button_clicked)
-
-        # search layout
-        search_layout = QtWidgets.QHBoxLayout()
-        search_layout.addWidget(keyword)
-        search_layout.addWidget(search_button)
-
-        # result model
-        result_model = ResultModel(headers=source.TABLE_HEADERS)
-
-        # result table
-        # result_table = QtWidgets.QTableWidget()
-        result_table = QtWidgets.QTableView()
-        self.result_table = result_table
-        # disable header hightlight
-        result_table.horizontalHeader().setHighlightSections(False)
-        # select full row
-        result_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
-        # disable edit row
-        result_table.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
-        result_table.setModel(result_model)
-
-        # result layout
-        result_layout = QtWidgets.QHBoxLayout()
-        result_layout.addWidget(result_table)
-
-        # main layout
-        main_layout = QtWidgets.QVBoxLayout()
-        main_layout.addLayout(search_layout)
-        main_layout.addLayout(result_layout)
-
-        # main widget
-        main_widget = QtWidgets.QWidget()
-        main_widget.setLayout(main_layout)
+        main_widget = MainWidget(window=self)
         self.setCentralWidget(main_widget)
 
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
@@ -111,18 +68,6 @@ class Window(QtWidgets.QMainWindow):
 
         self.settings.setValue("UI/width", width)
         self.settings.setValue("UI/height", height)
-
-    @asyncSlot()
-    async def on_search_button_clicked(self):
-        keyword = self.keyword.text()
-        if len(keyword) < 2:
-            QtWidgets.QMessageBox.warning(self, "Error", "Keyword must be at least 2 characters")
-            return
-
-        results = await self.source.search(keyword)
-
-        self.result_table.setModel(ResultModel(headers=self.source.TABLE_HEADERS, rows=results))
-        self.result_table.update()
 
     def show_about_dialog(self):
         # text = (
@@ -137,7 +82,100 @@ class Window(QtWidgets.QMainWindow):
         self.about_dialog.show()
 
 
-class ResultModel(QtCore.QAbstractTableModel):
+class Dialog(QtWidgets.QDialog):
+    def __init__(self, title: str):
+        super().__init__()
+
+        self.setWindowTitle(title)
+        # can't close main window until close dialog
+        self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
+
+
+class HLayout(QtWidgets.QHBoxLayout):
+    """left to right layout"""
+
+
+class VLayout(QtWidgets.QVBoxLayout):
+    """top to bottom layout"""
+
+
+class MainWidget(QtWidgets.QWidget):
+    def __init__(self, window: Window) -> None:
+        super().__init__()
+
+        # search layout
+        search_layout = SearchLayout(window=window)
+
+        # result layout
+        result_layout = ResultLayout(window=window)
+
+        # main layout
+        main_layout = VLayout()
+        main_layout.addLayout(search_layout)
+        main_layout.addLayout(result_layout)
+
+        self.setLayout(main_layout)
+
+
+class SearchLayout(HLayout):
+    def __init__(self, window: Window) -> None:
+        super().__init__()
+
+        self.window = window
+
+        # search keyword
+        keyword = QtWidgets.QLineEdit()
+        window.keyword = keyword
+
+        # search button
+        search_button = QtWidgets.QPushButton("Search")
+        search_button.clicked.connect(self.on_search_button_clicked)
+
+        # search layout
+        self.addWidget(keyword)
+        self.addWidget(search_button)
+
+    @asyncSlot()
+    async def on_search_button_clicked(self):
+        keyword = self.keyword.text()
+        if len(keyword) < 2:
+            QtWidgets.QMessageBox.warning(self, "Error", "Keyword must be at least 2 characters")
+            return
+
+        results = await self.window.source.search(keyword)
+
+        self.result_table.setModel(TableModel(headers=self.source.TABLE_HEADERS, rows=results))
+        self.result_table.update()
+
+
+class ResultLayout(HLayout):
+    def __init__(self, window: Window) -> None:
+        super().__init__()
+
+        # result model
+        result_model = TableModel(headers=window.source.TABLE_HEADERS)
+
+        # result table
+        result_table = TableView(window=window)
+        result_table.setModel(result_model)
+
+        # result layout
+        self.addWidget(result_table)
+
+
+class TableView(QtWidgets.QTableView):
+    def __init__(self, window: Window) -> None:
+        super().__init__()
+
+        # disable header hightlight
+        self.horizontalHeader().setHighlightSections(False)
+        # select full row
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
+        # disable edit row
+        self.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
+
+
+class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, headers={}, rows=[]) -> None:
         super().__init__()
 

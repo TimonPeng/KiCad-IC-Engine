@@ -9,7 +9,7 @@ class RESTfulClient:
         "Content-Type": "application/json",
         "User-Agent": "KiCad-IC-Engine/1.0.0 (+https://github.com/TimonPeng/KiCad-IC-Engine)",
     }
-    TABLE_HEADERS = {}
+    TABLE_HEADERS: dict[str, str] = {}
 
     @classmethod
     def get(cls, path: str, **kwargs) -> Any:
