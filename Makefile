@@ -1,11 +1,9 @@
+init:
+	poetry shell
+	make install
+
 install:
-	pip install -r requirements.txt
-
-uninstall:
-	pip freeze | xargs pip uninstall -y
-
-compile:
-	pip-compile --output-file=requirements.txt requirements.in && make install
+	poetry install
 
 format:
 	isort src
@@ -14,5 +12,5 @@ format:
 lint:
 	black --check --diff --line-length=120 src
 	flake8 src
+	pylint src
 	mypy src
-	pylint --rcfile=.pylintrc src

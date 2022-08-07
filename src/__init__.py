@@ -1,4 +1,4 @@
 import sys
 
-if sys.version_info < (3, 4):
-    raise EnvironmentError("Python 3.4 or above is required.")
+if not sys.version_info >= (3, 7) or not sys.version_info < (4, 0):
+    raise EnvironmentError("Python >=3.7 or <4.0 is required.")

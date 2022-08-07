@@ -46,13 +46,13 @@ class Window(QtWidgets.QMainWindow):
         # settings will be merged when running on macOS
         # settings_action = file_menu.addAction("Settings")
         close_action = file_menu.addAction("Close")
-        close_action.triggered.connect(self.close)
+        close_action.triggered.connect(self.close)  # type: ignore
 
         # help menu
         help_menu = menu_bar.addMenu("Help")
         # about will be merged when running on macOS
         about_action = help_menu.addAction("About")
-        about_action.triggered.connect(self.show_about_dialog)
+        about_action.triggered.connect(self.show_about_dialog)  # type: ignore
 
         """
         main layout widget
@@ -129,7 +129,7 @@ class SearchLayout(HLayout):
 
         # search button
         search_button = QtWidgets.QPushButton("Search")
-        search_button.clicked.connect(self.on_search_button_clicked)
+        search_button.clicked.connect(self.on_search_button_clicked)  # type: ignore
 
         # search layout
         self.addWidget(keyword)
@@ -137,20 +137,22 @@ class SearchLayout(HLayout):
 
     @asyncSlot()
     async def on_search_button_clicked(self):
-        keyword = self.keyword.text()
+        keyword = self.window.keyword.text()
         if len(keyword) < 2:
             QtWidgets.QMessageBox.warning(self, "Error", "Keyword must be at least 2 characters")
             return
 
         results = await self.window.source.search(keyword)
 
-        self.result_table.setModel(TableModel(headers=self.source.TABLE_HEADERS, rows=results))
-        self.result_table.update()
+        self.window.result_table.setModel(TableModel(headers=self.window.source.TABLE_HEADERS, rows=results))
+        self.window.result_table.update()
 
 
 class ResultLayout(HLayout):
     def __init__(self, window: Window) -> None:
         super().__init__()
+
+        self.window = window
 
         # result model
         result_model = TableModel(headers=window.source.TABLE_HEADERS)
@@ -158,6 +160,7 @@ class ResultLayout(HLayout):
         # result table
         result_table = TableView(window=window)
         result_table.setModel(result_model)
+        self.window.result_table = result_table  # type: ignore
 
         # result layout
         self.addWidget(result_table)

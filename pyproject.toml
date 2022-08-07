@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "KiCad-IC-Engine"
+version = "1.0.0"
+description = "Electronic components search & load engine for KiCad."
+authors = ["TimonPeng <timonminipeng@gmail.com>"]
+license = "GPL-3.0"
+readme = "README.md"
+homepage = "https://github.com/TimonPeng/KiCad-IC-Engine"
+
+[tool.poetry.dependencies]
+python = ">=3.7.2, <4.0"
+aiohttp = {extras = ["speedups"], version = "^3.8.1"}
+logzero = "^1.7.0"
+easyeda2kicad = "^0.5.4"
+PyQt6 = "^6.3.1"
+qasync = "^0.23.0"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^5.0.4"
+black = "^22.6.0"
+isort = "^5.10.1"
+mypy = "^0.971"
+pylint = "^2.14.5"
+ipdb = "^0.13.9"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
