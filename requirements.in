@@ -1,8 +1,9 @@
 # production
-requests[socks]
+aiohttp[speedups]
 logzero
 easyeda2kicad
 PyQt6
+qasync
 
 # development
 pip==22.0.4
@@ -15,4 +16,3 @@ isort
 ipdb
 
 # typing
-types-requests

@@ -1,5 +1,6 @@
 import easyeda2kicad
 from PyQt6 import QtCore, QtGui, QtWidgets
+from qasync import asyncSlot
 
 from .api import SZLCSC
 
@@ -100,13 +101,14 @@ class Window(QtWidgets.QMainWindow):
         self.settings.setValue("UI/width", width)
         self.settings.setValue("UI/height", height)
 
-    def on_search_button_clicked(self):
+    @asyncSlot()
+    async def on_search_button_clicked(self):
         keyword = self.keyword.text()
         if len(keyword) < 2:
             QtWidgets.QMessageBox.warning(self, "Error", "Keyword must be at least 2 characters")
             return
 
-        results = self.source.search(keyword)
+        results = await self.source.search(keyword)
 
         self.result_table.setModel(ResultModel(results))
         self.result_table.update()
