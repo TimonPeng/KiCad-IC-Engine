@@ -1,12 +1,17 @@
+import sys
+
 from PyQt6 import QtCore, QtGui, QtWidgets
 from qasync import asyncSlot
 
 from .api import SZLCSC
+from .version import homepage, name, version
 
 
 class Window(QtWidgets.QMainWindow):
     # search keyword
     keyword: QtWidgets.QLineEdit
+    # result table
+    result_table: "TableView"
 
     def __init__(self, settings: QtCore.QSettings) -> None:
         super().__init__()
@@ -32,9 +37,9 @@ class Window(QtWidgets.QMainWindow):
         """
         dialog
         """
-        # about dialog
-        about_dialog = Dialog("About")
-        self.about_dialog = about_dialog
+        # settings dialog
+        settings_dialog = SettingsDialog("Settings")
+        self.settings_dialog = settings_dialog
 
         """
         menu bar
@@ -44,7 +49,8 @@ class Window(QtWidgets.QMainWindow):
         # file menu
         file_menu = menu_bar.addMenu("File")
         # settings will be merged when running on macOS
-        # settings_action = file_menu.addAction("Settings")
+        settings_action = file_menu.addAction("Settings")
+        settings_action.triggered.connect(self.show_settings_dialog)  # type: ignore
         close_action = file_menu.addAction("Close")
         close_action.triggered.connect(self.close)  # type: ignore
 
@@ -69,17 +75,22 @@ class Window(QtWidgets.QMainWindow):
         self.settings.setValue("UI/width", width)
         self.settings.setValue("UI/height", height)
 
+    def show_settings_dialog(self):
+        self.settings_dialog.show()
+
     def show_about_dialog(self):
-        # text = (
-        #     "<center>"
-        #     f"<h1>{self.windowTitle()}</h1>"
-        #     f"<p>PyQt {QtCore.PYQT_VERSION_STR}</p>"
-        #     f"<p>Qt {QtCore.QT_VERSION_STR}</p>"
-        #     "<p>Version 31.4.159.265358</p>"
-        #     "</center>"
-        # )
-        # QtWidgets.QMessageBox.about(self, "About", text)
-        self.about_dialog.show()
+        text = (
+            "<center>"
+            f"<h2>{name}</h2>"
+            f"Version {version}<br>"
+            f"<a href='{homepage}'>{homepage}</a><br>"
+            f"PyQt {QtCore.PYQT_VERSION_STR} Qt {QtCore.QT_VERSION_STR}<br>"
+            f"Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+            f"-{sys.version_info.releaselevel}"
+            "</center>"
+        )
+        QtWidgets.QMessageBox.about(self, "About", text)
+        # self.about_dialog.show()
 
 
 class Dialog(QtWidgets.QDialog):
@@ -89,6 +100,11 @@ class Dialog(QtWidgets.QDialog):
         self.setWindowTitle(title)
         # can't close main window until close dialog
         self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
+
+
+class SettingsDialog(Dialog):
+    def __init__(self, title: str):
+        super().__init__(title)
 
 
 class HLayout(QtWidgets.QHBoxLayout):
@@ -160,7 +176,7 @@ class ResultLayout(HLayout):
         # result table
         result_table = TableView(window=window)
         result_table.setModel(result_model)
-        self.window.result_table = result_table  # type: ignore
+        self.window.result_table = result_table
 
         # result layout
         self.addWidget(result_table)

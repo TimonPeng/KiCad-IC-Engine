@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QApplication
 from qasync import QEventLoop
 
 from src.gui import Window
+from src.version import name
 
 
 def main() -> None:
@@ -14,14 +15,12 @@ def main() -> None:
 
     settings = QSettings("config.ini", QSettings.Format.IniFormat)
 
-    title = "KiCad IC Engine"
-
     app = QApplication(sys.argv)
-    app.setApplicationName(title)
-    app.setApplicationDisplayName(title)
+    app.setApplicationName(name)
+    app.setApplicationDisplayName(name)
 
     window = Window(settings)
-    window.setWindowTitle(title)
+    window.setWindowTitle(name)
     window.show()
 
     loop = QEventLoop(app)
