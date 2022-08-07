@@ -4,7 +4,7 @@ from aiohttp import ClientSession
 
 
 class RESTfulClient:
-    ENDPOINT = ""
+    API_ENDPOINT = ""
     HEADERS = {
         "Content-Type": "application/json",
         "User-Agent": "KiCad-IC-Engine/1.0.0 (+https://github.com/TimonPeng/KiCad-IC-Engine)",
@@ -22,7 +22,7 @@ class RESTfulClient:
     @classmethod
     async def request(cls, method: str, path: str, **kwargs):
         async with ClientSession(headers=cls.HEADERS) as session:
-            response = await getattr(session, method)(f"{cls.ENDPOINT}{path}", **kwargs)
+            response = await getattr(session, method)(f"{cls.API_ENDPOINT}{path}", **kwargs)
 
             res = await response.json()
 
@@ -34,7 +34,7 @@ class RESTfulClient:
 
 
 class SZLCSC(RESTfulClient):
-    ENDPOINT = "https://pro.lceda.cn/api"
+    API_ENDPOINT = "https://pro.lceda.cn/api"
     TABLE_HEADERS = {
         "No.": "index",
         "Device": "title",

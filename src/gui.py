@@ -25,6 +25,16 @@ class Window(QtWidgets.QMainWindow):
         self.resize(width, height)
 
         """
+        dialog
+        """
+        # about dialog
+        about_dialog = QtWidgets.QDialog()
+        about_dialog.setWindowTitle("About")
+        # can't close main window until close dialog
+        about_dialog.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
+        self.about_dialog = about_dialog
+
+        """
         menu bar
         """
         menu_bar = self.menuBar()
@@ -115,15 +125,16 @@ class Window(QtWidgets.QMainWindow):
         self.result_table.update()
 
     def show_about_dialog(self):
-        text = (
-            "<center>"
-            f"<h1>{self.windowTitle()}</h1>"
-            f"<p>PyQt {QtCore.PYQT_VERSION_STR}</p>"
-            f"<p>Qt {QtCore.QT_VERSION_STR}</p>"
-            "<p>Version 31.4.159.265358</p>"
-            "</center>"
-        )
-        QtWidgets.QMessageBox.about(self, "About", text)
+        # text = (
+        #     "<center>"
+        #     f"<h1>{self.windowTitle()}</h1>"
+        #     f"<p>PyQt {QtCore.PYQT_VERSION_STR}</p>"
+        #     f"<p>Qt {QtCore.QT_VERSION_STR}</p>"
+        #     "<p>Version 31.4.159.265358</p>"
+        #     "</center>"
+        # )
+        # QtWidgets.QMessageBox.about(self, "About", text)
+        self.about_dialog.show()
 
 
 class ResultModel(QtCore.QAbstractTableModel):
