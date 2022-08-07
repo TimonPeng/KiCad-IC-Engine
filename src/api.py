@@ -5,37 +5,55 @@ from aiohttp import ClientSession
 
 class RESTfulClient:
     ENDPOINT = ""
-    HEADERS = {"Content-Type": "application/json"}
+    HEADERS = {
+        "Content-Type": "application/json",
+        "User-Agent": "KiCad-IC-Engine/1.0.0 (+https://github.com/TimonPeng/KiCad-IC-Engine)",
+    }
+    TABLE_HEADERS = {}
 
-    def get(self, path: str, **kwargs) -> Any:
-        return self.request("get", path, **kwargs)
+    @classmethod
+    def get(cls, path: str, **kwargs) -> Any:
+        return cls.request("get", path, **kwargs)
 
-    def post(self, path: str, **kwargs) -> Any:
-        return self.request("post", path, **kwargs)
+    @classmethod
+    def post(cls, path: str, **kwargs) -> Any:
+        return cls.request("post", path, **kwargs)
 
-    async def request(self, method: str, path: str, **kwargs):
-        async with ClientSession(headers=self.HEADERS) as session:
-            response = await getattr(session, method)(f"{self.ENDPOINT}{path}", **kwargs)
+    @classmethod
+    async def request(cls, method: str, path: str, **kwargs):
+        async with ClientSession(headers=cls.HEADERS) as session:
+            response = await getattr(session, method)(f"{cls.ENDPOINT}{path}", **kwargs)
 
             res = await response.json()
 
-            return self.process_data(res)
+            return cls.process_data(res)
 
-    def process_data(self, data):
+    @classmethod
+    def process_data(cls, data):
         return data
 
 
 class SZLCSC(RESTfulClient):
     ENDPOINT = "https://pro.lceda.cn/api"
+    TABLE_HEADERS = {
+        "No.": "index",
+        "Device": "title",
+        "Footprint": "footprint_title",
+        "Symbol": "symbol_title",
+        "Value": "value",
+        "Supplier Part": "supplier_part",
+    }
 
-    def process_data(self, data):
+    @classmethod
+    def process_data(cls, data):
         if not data.get("success") or data.get("code") != 0:
             raise Exception(data.get("message", "Fail to get data"))
 
         return data
 
-    async def search(self, keyword: str):
-        data = await self.get("/szlcsc/eda/product/list", params={"wd": keyword})
+    @classmethod
+    async def search(cls, keyword: str):
+        data = await cls.get("/szlcsc/eda/product/list", params={"wd": keyword})
 
         results = []
 

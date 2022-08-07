@@ -45,7 +45,8 @@ class Window(QtWidgets.QMainWindow):
         """
         search source
         """
-        self.source = SZLCSC()
+        source = SZLCSC
+        self.source = source
 
         """
         layout
@@ -64,7 +65,7 @@ class Window(QtWidgets.QMainWindow):
         search_layout.addWidget(search_button)
 
         # result model
-        result_model = ResultModel()
+        result_model = ResultModel(headers=source.TABLE_HEADERS)
 
         # result table
         # result_table = QtWidgets.QTableWidget()
@@ -110,7 +111,7 @@ class Window(QtWidgets.QMainWindow):
 
         results = await self.source.search(keyword)
 
-        self.result_table.setModel(ResultModel(results))
+        self.result_table.setModel(ResultModel(headers=self.source.TABLE_HEADERS, rows=results))
         self.result_table.update()
 
     def show_about_dialog(self):
@@ -126,18 +127,11 @@ class Window(QtWidgets.QMainWindow):
 
 
 class ResultModel(QtCore.QAbstractTableModel):
-    def __init__(self, rows=[]) -> None:
+    def __init__(self, headers={}, rows=[]) -> None:
         super().__init__()
 
         # display name -> key
-        self.headers = {
-            "No.": "index",
-            "Device": "title",
-            "Footprint": "footprint_title",
-            "Symbol": "symbol_title",
-            "Value": "value",
-            "Supplier Part": "supplier_part",
-        }
+        self.headers = headers
         self.header_keys = list(self.headers.keys())
         self.rows = rows
 
